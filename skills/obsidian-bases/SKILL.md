@@ -5,11 +5,21 @@ description: Create and edit Obsidian Bases (.base files) with views, filters, f
 
 # Obsidian Bases Skill
 
-This skill enables skills-compatible agents to create and edit valid Obsidian Bases (`.base` files) including views, filters, formulas, and all related configurations.
+## Quick Start Workflow
 
-## Overview
+1. **Create the `.base` file** — Give it a descriptive name (e.g., `Tasks.base`) and open it in Obsidian.
+2. **Add minimal global filters** — Scope to the right notes (e.g., `file.hasTag("task")` or `file.inFolder("Projects")`).
+3. **Define at least one view** — Start with a `table` view and list the properties you want in `order`.
+4. **Test in Obsidian** — Open the file; if no results appear, see Validation below.
+5. **Iterate** — Add formulas, extra views, groupBy, summaries, and per-view filters incrementally.
 
-Obsidian Bases are YAML-based files that define dynamic views of notes in an Obsidian vault. A Base file can contain multiple views, global filters, formulas, property configurations, and custom summaries.
+### Validation Checklist
+
+If a Base shows no results or errors, check:
+1. **Filter syntax errors** — Strings with operators must be quoted: `'status == "done"'`.
+2. **Property name mismatch** — Names must exactly match the frontmatter keys in target notes.
+3. **Missing file extension filter** — Add `'file.ext == "md"'` if non-note files are being picked up.
+4. **YAML quoting** — Use single quotes around formula strings that contain double quotes.
 
 ## File Format
 
@@ -193,13 +203,59 @@ formulas:
 | `html()` | `html(string): html` | Render as HTML |
 | `escapeHTML()` | `escapeHTML(string): string` | Escape HTML characters |
 
-### Any Type Functions
+### Type Functions
 
-| Function | Signature | Description |
-|----------|-----------|-------------|
-| `isTruthy()` | `any.isTruthy(): boolean` | Coerce to boolean |
-| `isType()` | `any.isType(type): boolean` | Check type |
-| `toString()` | `any.toString(): string` | Convert to string |
+| Type | Function | Signature | Description |
+|------|----------|-----------|-------------|
+| Any | `isTruthy()` | `any.isTruthy(): boolean` | Coerce to boolean |
+| Any | `isType()` | `any.isType(type): boolean` | Check type |
+| Any | `toString()` | `any.toString(): string` | Convert to string |
+| String | `contains()` | `string.contains(value): boolean` | Check substring |
+| String | `containsAll()` | `string.containsAll(...values): boolean` | All substrings present |
+| String | `containsAny()` | `string.containsAny(...values): boolean` | Any substring present |
+| String | `startsWith()` | `string.startsWith(query): boolean` | Starts with query |
+| String | `endsWith()` | `string.endsWith(query): boolean` | Ends with query |
+| String | `isEmpty()` | `string.isEmpty(): boolean` | Empty or not present |
+| String | `lower()` | `string.lower(): string` | To lowercase |
+| String | `title()` | `string.title(): string` | To Title Case |
+| String | `trim()` | `string.trim(): string` | Remove whitespace |
+| String | `replace()` | `string.replace(pattern, replacement): string` | Replace pattern |
+| String | `repeat()` | `string.repeat(count): string` | Repeat string |
+| String | `reverse()` | `string.reverse(): string` | Reverse string |
+| String | `slice()` | `string.slice(start, end?): string` | Substring |
+| String | `split()` | `string.split(separator, n?): list` | Split to list |
+| String | `length` | `string.length` | Character count (field) |
+| Number | `abs()` | `number.abs(): number` | Absolute value |
+| Number | `ceil()` | `number.ceil(): number` | Round up |
+| Number | `floor()` | `number.floor(): number` | Round down |
+| Number | `round()` | `number.round(digits?): number` | Round to digits |
+| Number | `toFixed()` | `number.toFixed(precision): string` | Fixed-point notation |
+| Number | `isEmpty()` | `number.isEmpty(): boolean` | Not present |
+| List | `contains()` | `list.contains(value): boolean` | Element exists |
+| List | `containsAll()` | `list.containsAll(...values): boolean` | All elements exist |
+| List | `containsAny()` | `list.containsAny(...values): boolean` | Any element exists |
+| List | `filter()` | `list.filter(expression): list` | Filter by condition (uses `value`, `index`) |
+| List | `map()` | `list.map(expression): list` | Transform elements (uses `value`, `index`) |
+| List | `reduce()` | `list.reduce(expression, initial): any` | Reduce to single value (uses `value`, `index`, `acc`) |
+| List | `flat()` | `list.flat(): list` | Flatten nested lists |
+| List | `join()` | `list.join(separator): string` | Join to string |
+| List | `reverse()` | `list.reverse(): list` | Reverse order |
+| List | `slice()` | `list.slice(start, end?): list` | Sublist |
+| List | `sort()` | `list.sort(): list` | Sort ascending |
+| List | `unique()` | `list.unique(): list` | Remove duplicates |
+| List | `isEmpty()` | `list.isEmpty(): boolean` | No elements |
+| List | `length` | `list.length` | Element count (field) |
+| File | `asLink()` | `file.asLink(display?): Link` | Convert to link |
+| File | `hasLink()` | `file.hasLink(otherFile): boolean` | Has link to file |
+| File | `hasTag()` | `file.hasTag(...tags): boolean` | Has any of the tags |
+| File | `hasProperty()` | `file.hasProperty(name): boolean` | Has property |
+| File | `inFolder()` | `file.inFolder(folder): boolean` | In folder or subfolder |
+| Link | `asFile()` | `link.asFile(): file` | Get file object |
+| Link | `linksTo()` | `link.linksTo(file): boolean` | Links to file |
+| Object | `isEmpty()` | `object.isEmpty(): boolean` | No properties |
+| Object | `keys()` | `object.keys(): list` | List of keys |
+| Object | `values()` | `object.values(): list` | List of values |
+| Regexp | `matches()` | `regexp.matches(string): boolean` | Test if matches |
 
 ### Date Functions & Fields
 
@@ -217,28 +273,18 @@ formulas:
 
 When subtracting two dates, the result is a **Duration** type (not a number). Duration has its own properties and methods.
 
-**Duration Fields:**
-| Field | Type | Description |
-|-------|------|-------------|
-| `duration.days` | Number | Total days in duration |
-| `duration.hours` | Number | Total hours in duration |
-| `duration.minutes` | Number | Total minutes in duration |
-| `duration.seconds` | Number | Total seconds in duration |
-| `duration.milliseconds` | Number | Total milliseconds in duration |
+**Duration Fields:** `duration.days`, `duration.hours`, `duration.minutes`, `duration.seconds`, `duration.milliseconds` — all return total units as Number.
 
-**IMPORTANT:** Duration does NOT support `.round()`, `.floor()`, `.ceil()` directly. You must access a numeric field first (like `.days`), then apply number functions.
+**IMPORTANT:** Duration does NOT support `.round()`, `.floor()`, `.ceil()` directly. Access a numeric field first, then apply number functions.
 
 ```yaml
-# CORRECT: Calculate days between dates
-"(date(due_date) - today()).days"                    # Returns number of days
-"(now() - file.ctime).days"                          # Days since created
-
-# CORRECT: Round the numeric result if needed
-"(date(due_date) - today()).days.round(0)"           # Rounded days
-"(now() - file.ctime).hours.round(0)"                # Rounded hours
+# CORRECT
+"(date(due_date) - today()).days"           # Returns number of days
+"(now() - file.ctime).days.round(0)"        # Rounded days
+"(now() - file.ctime).hours.round(0)"       # Rounded hours
 
 # WRONG - will cause error:
-# "((date(due) - today()) / 86400000).round(0)"      # Duration doesn't support division then round
+# "((date(due) - today()) / 86400000).round(0)"
 ```
 
 ### Date Arithmetic
@@ -247,103 +293,12 @@ When subtracting two dates, the result is a **Duration** type (not a number). Du
 # Duration units: y/year/years, M/month/months, d/day/days,
 #                 w/week/weeks, h/hour/hours, m/minute/minutes, s/second/seconds
 
-# Add/subtract durations
 "date + \"1M\""           # Add 1 month
-"date - \"2h\""           # Subtract 2 hours
 "now() + \"1 day\""       # Tomorrow
 "today() + \"7d\""        # A week from today
-
-# Subtract dates returns Duration type
-"now() - file.ctime"                    # Returns Duration
-"(now() - file.ctime).days"             # Get days as number
-"(now() - file.ctime).hours"            # Get hours as number
-
-# Complex duration arithmetic
+"(now() - file.ctime).days"   # Days since created (Duration → Number)
 "now() + (duration('1d') * 2)"
 ```
-
-### String Functions
-
-**Field:** `string.length`
-
-| Function | Signature | Description |
-|----------|-----------|-------------|
-| `contains()` | `string.contains(value): boolean` | Check substring |
-| `containsAll()` | `string.containsAll(...values): boolean` | All substrings present |
-| `containsAny()` | `string.containsAny(...values): boolean` | Any substring present |
-| `startsWith()` | `string.startsWith(query): boolean` | Starts with query |
-| `endsWith()` | `string.endsWith(query): boolean` | Ends with query |
-| `isEmpty()` | `string.isEmpty(): boolean` | Empty or not present |
-| `lower()` | `string.lower(): string` | To lowercase |
-| `title()` | `string.title(): string` | To Title Case |
-| `trim()` | `string.trim(): string` | Remove whitespace |
-| `replace()` | `string.replace(pattern, replacement): string` | Replace pattern |
-| `repeat()` | `string.repeat(count): string` | Repeat string |
-| `reverse()` | `string.reverse(): string` | Reverse string |
-| `slice()` | `string.slice(start, end?): string` | Substring |
-| `split()` | `string.split(separator, n?): list` | Split to list |
-
-### Number Functions
-
-| Function | Signature | Description |
-|----------|-----------|-------------|
-| `abs()` | `number.abs(): number` | Absolute value |
-| `ceil()` | `number.ceil(): number` | Round up |
-| `floor()` | `number.floor(): number` | Round down |
-| `round()` | `number.round(digits?): number` | Round to digits |
-| `toFixed()` | `number.toFixed(precision): string` | Fixed-point notation |
-| `isEmpty()` | `number.isEmpty(): boolean` | Not present |
-
-### List Functions
-
-**Field:** `list.length`
-
-| Function | Signature | Description |
-|----------|-----------|-------------|
-| `contains()` | `list.contains(value): boolean` | Element exists |
-| `containsAll()` | `list.containsAll(...values): boolean` | All elements exist |
-| `containsAny()` | `list.containsAny(...values): boolean` | Any element exists |
-| `filter()` | `list.filter(expression): list` | Filter by condition (uses `value`, `index`) |
-| `map()` | `list.map(expression): list` | Transform elements (uses `value`, `index`) |
-| `reduce()` | `list.reduce(expression, initial): any` | Reduce to single value (uses `value`, `index`, `acc`) |
-| `flat()` | `list.flat(): list` | Flatten nested lists |
-| `join()` | `list.join(separator): string` | Join to string |
-| `reverse()` | `list.reverse(): list` | Reverse order |
-| `slice()` | `list.slice(start, end?): list` | Sublist |
-| `sort()` | `list.sort(): list` | Sort ascending |
-| `unique()` | `list.unique(): list` | Remove duplicates |
-| `isEmpty()` | `list.isEmpty(): boolean` | No elements |
-
-### File Functions
-
-| Function | Signature | Description |
-|----------|-----------|-------------|
-| `asLink()` | `file.asLink(display?): Link` | Convert to link |
-| `hasLink()` | `file.hasLink(otherFile): boolean` | Has link to file |
-| `hasTag()` | `file.hasTag(...tags): boolean` | Has any of the tags |
-| `hasProperty()` | `file.hasProperty(name): boolean` | Has property |
-| `inFolder()` | `file.inFolder(folder): boolean` | In folder or subfolder |
-
-### Link Functions
-
-| Function | Signature | Description |
-|----------|-----------|-------------|
-| `asFile()` | `link.asFile(): file` | Get file object |
-| `linksTo()` | `link.linksTo(file): boolean` | Links to file |
-
-### Object Functions
-
-| Function | Signature | Description |
-|----------|-----------|-------------|
-| `isEmpty()` | `object.isEmpty(): boolean` | No properties |
-| `keys()` | `object.keys(): list` | List of keys |
-| `values()` | `object.values(): list` | List of values |
-
-### Regular Expression Functions
-
-| Function | Signature | Description |
-|----------|-----------|-------------|
-| `matches()` | `regexp.matches(string): boolean` | Test if matches |
 
 ## View Types
 
@@ -393,7 +348,6 @@ Requires latitude/longitude properties and the Maps community plugin.
 views:
   - type: map
     name: "Locations"
-    # Map-specific settings for lat/lng properties
 ```
 
 ## Default Summary Formulas
@@ -416,9 +370,7 @@ views:
 | `Filled` | Any | Count of non-empty values |
 | `Unique` | Any | Count of unique values |
 
-## Complete Examples
-
-### Task Tracker Base
+## Complete Example — Task Tracker Base
 
 ```yaml
 filters:
@@ -467,139 +419,6 @@ views:
       - completed_date
 ```
 
-### Reading List Base
-
-```yaml
-filters:
-  or:
-    - file.hasTag("book")
-    - file.hasTag("article")
-
-formulas:
-  reading_time: 'if(pages, (pages * 2).toString() + " min", "")'
-  status_icon: 'if(status == "reading", "📖", if(status == "done", "✅", "📚"))'
-  year_read: 'if(finished_date, date(finished_date).year, "")'
-
-properties:
-  author:
-    displayName: Author
-  formula.status_icon:
-    displayName: ""
-  formula.reading_time:
-    displayName: "Est. Time"
-
-views:
-  - type: cards
-    name: "Library"
-    order:
-      - cover
-      - file.name
-      - author
-      - formula.status_icon
-    filters:
-      not:
-        - 'status == "dropped"'
-
-  - type: table
-    name: "Reading List"
-    filters:
-      and:
-        - 'status == "to-read"'
-    order:
-      - file.name
-      - author
-      - pages
-      - formula.reading_time
-```
-
-### Project Notes Base
-
-```yaml
-filters:
-  and:
-    - file.inFolder("Projects")
-    - 'file.ext == "md"'
-
-formulas:
-  last_updated: 'file.mtime.relative()'
-  link_count: 'file.links.length'
-
-summaries:
-  avgLinks: 'values.filter(value.isType("number")).mean().round(1)'
-
-properties:
-  formula.last_updated:
-    displayName: "Updated"
-  formula.link_count:
-    displayName: "Links"
-
-views:
-  - type: table
-    name: "All Projects"
-    order:
-      - file.name
-      - status
-      - formula.last_updated
-      - formula.link_count
-    summaries:
-      formula.link_count: avgLinks
-    groupBy:
-      property: status
-      direction: ASC
-
-  - type: list
-    name: "Quick List"
-    order:
-      - file.name
-      - status
-```
-
-### Daily Notes Index
-
-```yaml
-filters:
-  and:
-    - file.inFolder("Daily Notes")
-    - '/^\d{4}-\d{2}-\d{2}$/.matches(file.basename)'
-
-formulas:
-  word_estimate: '(file.size / 5).round(0)'
-  day_of_week: 'date(file.basename).format("dddd")'
-
-properties:
-  formula.day_of_week:
-    displayName: "Day"
-  formula.word_estimate:
-    displayName: "~Words"
-
-views:
-  - type: table
-    name: "Recent Notes"
-    limit: 30
-    order:
-      - file.name
-      - formula.day_of_week
-      - formula.word_estimate
-      - file.mtime
-```
-
-## Embedding Bases
-
-Embed in Markdown files:
-
-```markdown
-![[MyBase.base]]
-
-<!-- Specific view -->
-![[MyBase.base#View Name]]
-```
-
-## YAML Quoting Rules
-
-- Use single quotes for formulas containing double quotes: `'if(done, "Yes", "No")'`
-- Use double quotes for simple strings: `"My View Name"`
-- Escape nested quotes properly in complex expressions
-
 ## Common Patterns
 
 ### Filter by Tag
@@ -642,6 +461,21 @@ filters:
         - 'priority == 1'
         - 'due != ""'
 ```
+
+## Embedding Bases
+
+```markdown
+![[MyBase.base]]
+
+<!-- Specific view -->
+![[MyBase.base#View Name]]
+```
+
+## YAML Quoting Rules
+
+- Use single quotes for formulas containing double quotes: `'if(done, "Yes", "No")'`
+- Use double quotes for simple strings: `"My View Name"`
+- Escape nested quotes properly in complex expressions
 
 ## References
 
